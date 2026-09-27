@@ -19,6 +19,7 @@ MAX_NAME=100
 MAX_DEFINITION=900
 MAX_OPERATION=1600
 MAX_UNITS=1_000_000_000
+MAX_AUTHORIZED_CALLERS=8
 ERR_EXPECTED="EXPECTED"; ERR_STATE="STATE"; ERR_AUTH="AUTH"
 
 @allow_storage
@@ -30,6 +31,7 @@ class Policy:
     created_at: str
     sealed_at: str
     class_ids: DynArray[u256]
+    authorized_callers: DynArray[Address]
     decision_count: u32
 
 @allow_storage
@@ -67,6 +69,7 @@ class IThrottle:
         def create_policy(self,title:str)->u256: ...
         def add_class(self,policy_id:u256,name:str,definition:str,capacity:u256)->u256: ...
         def seal_policy(self,policy_id:u256)->None: ...
+        def add_authorized_caller(self,policy_id:u256,caller:Address)->None: ...
         def authorize_operation(self,policy_id:u256,operation:str,requested_units:u256)->u256: ...
 
 class PolicyCreated(gl.Event):
@@ -176,7 +179,7 @@ class Throttle(gl.Contract):
     @gl.public.write
     def create_policy(self,title:str)->u256:
         title=valid("title",title,160);i=self.next_policy_id;self.next_policy_id=u256(int(i)+1)
-        p=self.policies.get_or_insert_default(i);p.creator=gl.message.sender_address;p.title=title;p.status=u8(POLICY_OPEN);p.created_at=now();p.sealed_at="";p.decision_count=u32(0)
+        p=self.policies.get_or_insert_default(i);p.creator=gl.message.sender_address;p.title=title;p.status=u8(POLICY_OPEN);p.created_at=now();p.sealed_at="";p.decision_count=u32(0);p.authorized_callers.append(gl.message.sender_address)
         PolicyCreated(i,gl.message.sender_address,title=title).emit();return i
     @gl.public.write
     def add_class(self,policy_id:u256,name:str,definition:str,capacity:u256)->u256:
@@ -195,11 +198,25 @@ class Throttle(gl.Contract):
         if p.creator!=gl.message.sender_address:raise gl.vm.UserError(f"{ERR_AUTH}: only creator may seal")
         if int(p.status)!=POLICY_OPEN:raise gl.vm.UserError(f"{ERR_STATE}: policy already sealed")
         if len(p.class_ids)<1:raise gl.vm.UserError(f"{ERR_EXPECTED}: policy needs at least one class")
+        if len(p.authorized_callers)<1:raise gl.vm.UserError(f"{ERR_EXPECTED}: policy needs at least one authorized caller")
         p.status=u8(POLICY_SEALED);p.sealed_at=now();PolicySealed(policy_id,class_count=len(p.class_ids)).emit()
+    @gl.public.write
+    def add_authorized_caller(self,policy_id:u256,caller:Address)->None:
+        p=self._policy(policy_id)
+        if p.creator!=gl.message.sender_address:raise gl.vm.UserError(f"{ERR_AUTH}: only creator may authorize callers")
+        if int(p.status)!=POLICY_OPEN:raise gl.vm.UserError(f"{ERR_STATE}: policy is sealed")
+        if len(p.authorized_callers)>=MAX_AUTHORIZED_CALLERS:raise gl.vm.UserError(f"{ERR_EXPECTED}: at most {MAX_AUTHORIZED_CALLERS} authorized callers")
+        for existing in p.authorized_callers:
+            if existing==caller:raise gl.vm.UserError(f"{ERR_EXPECTED}: caller already authorized")
+        p.authorized_callers.append(Address(caller))
     @gl.public.write
     def authorize_operation(self,policy_id:u256,operation:str,requested_units:u256)->u256:
         p=self._policy(policy_id)
         if int(p.status)!=POLICY_SEALED:raise gl.vm.UserError(f"{ERR_STATE}: policy must be sealed")
+        authorized=False
+        for caller in p.authorized_callers:
+            if caller==gl.message.sender_address:authorized=True
+        if not authorized:raise gl.vm.UserError(f"{ERR_AUTH}: caller is not authorized for policy")
         operation=valid("operation",operation,MAX_OPERATION)
         if int(requested_units)<=0 or int(requested_units)>MAX_UNITS:raise gl.vm.UserError(f"{ERR_EXPECTED}: invalid requested_units")
         payloads=self._payloads(p);r=self._verify(operation,payloads)
@@ -222,7 +239,7 @@ class Throttle(gl.Contract):
 
     @gl.public.view
     def get_policy(self,policy_id:u256)->dict:
-        p=self._policy(policy_id);return {"id":int(policy_id),"creator":str(p.creator),"title":str(p.title),"status":int(p.status),"created_at":str(p.created_at),"sealed_at":str(p.sealed_at),"class_ids":[int(x) for x in p.class_ids],"decision_count":int(p.decision_count)}
+        p=self._policy(policy_id);return {"id":int(policy_id),"creator":str(p.creator),"title":str(p.title),"status":int(p.status),"created_at":str(p.created_at),"sealed_at":str(p.sealed_at),"class_ids":[int(x) for x in p.class_ids],"authorized_callers":[str(x) for x in p.authorized_callers],"decision_count":int(p.decision_count)}
     @gl.public.view
     def get_class(self,class_id:u256)->dict:
         c=self._class(class_id);return {"id":int(class_id),"policy_id":int(c.policy_id),"name":str(c.name),"definition":str(c.definition),"capacity":int(c.capacity),"spent":int(c.spent),"remaining":int(c.capacity)-int(c.spent),"created_at":str(c.created_at)}
@@ -237,4 +254,4 @@ class Throttle(gl.Contract):
     @gl.public.view
     def runtime_chain_id(self)->u256:return gl.message.chain_id
     @gl.public.view
-    def protocol_constants(self)->dict:return {"policy_open":POLICY_OPEN,"policy_sealed":POLICY_SEALED,"decision_allowed":DECISION_ALLOWED,"decision_exhausted":DECISION_EXHAUSTED,"decision_ambiguous":DECISION_AMBIGUOUS,"max_classes":MAX_CLASSES}
+    def protocol_constants(self)->dict:return {"policy_open":POLICY_OPEN,"policy_sealed":POLICY_SEALED,"decision_allowed":DECISION_ALLOWED,"decision_exhausted":DECISION_EXHAUSTED,"decision_ambiguous":DECISION_AMBIGUOUS,"max_classes":MAX_CLASSES,"max_authorized_callers":MAX_AUTHORIZED_CALLERS}

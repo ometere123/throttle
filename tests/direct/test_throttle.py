@@ -13,6 +13,25 @@ def test_only_creator_adds(direct_vm,direct_deploy,direct_alice,direct_bob):
  direct_vm.sender=direct_alice;c=direct_deploy(CONTRACT,sdk_version=SDK);p=c.create_policy("x")
  with direct_vm.prank(direct_bob):
   with direct_vm.expect_revert("only creator"):c.add_class(p,"x","x effect",10)
+
+def test_unauthorized_caller_cannot_consume_policy_budget(direct_vm,direct_deploy,direct_alice,direct_bob):
+ c,p,pay,_=setup(direct_vm,direct_deploy,direct_alice)
+ direct_vm.mock_llm(JUDGE,out("SAME_CLASS","DIFFERENT_CLASS"))
+ with direct_vm.prank(direct_bob):
+  with direct_vm.expect_revert("not authorized"):
+   c.authorize_operation(p,"Pay vendor Acme 30 units",30)
+ assert c.remaining(pay)==100
+ assert c.get_policy(p)["decision_count"]==0
+
+def test_creator_can_authorize_bounded_caller_before_seal(direct_vm,direct_deploy,direct_alice,direct_bob):
+ direct_vm.sender=direct_alice;c=direct_deploy(CONTRACT,sdk_version=SDK);p=c.create_policy("x")
+ pay=c.add_class(p,"Vendor payment","x effect",100)
+ c.add_authorized_caller(p,direct_bob)
+ c.seal_policy(p)
+ direct_vm.mock_llm(JUDGE,out("SAME_CLASS"))
+ with direct_vm.prank(direct_bob):
+  d=c.authorize_operation(p,"Pay vendor",25)
+ assert c.get_decision(d)["status"]==1 and c.remaining(pay)==75
 def test_no_add_after_seal(direct_vm,direct_deploy,direct_alice):
  c,p,_,_=setup(direct_vm,direct_deploy,direct_alice)
  with direct_vm.expect_revert("sealed"):c.add_class(p,"x","x effect",10)
