@@ -31,3 +31,16 @@ After deployment call `runtime_chain_id()` and require 61999, then execute `LIVE
 - Explorer: https://explorer-studio.genlayer.com/address/0xCA740cc84E421868360313E230b3f2C23F12Cf58
 
 The complete observed lifecycle and transaction hashes are recorded in `REVIEW_EVIDENCE.md`.
+
+## Authorization-bound deployment
+
+The initial deployment above is superseded by the authorization-bound source:
+
+- Source commit: `10d63983752c5170acbe73b196757af9b566a96e`
+- Contract: `0x88f748ae9f1A3aCcdE889aA21a86e6214DCFc2e2`
+- Deployment transaction: `0xf2f7d3367e110c87afe61f653d28e0a6e49aca17a79029c43d97ca014abffa20`
+- Result: FINALIZED / MAJORITY_AGREE / SUCCESS
+- `runtime_chain_id()`: `61999`
+- Explorer: https://explorer-studio.genlayer.com/address/0x88f748ae9f1A3aCcdE889aA21a86e6214DCFc2e2
+
+Policies automatically authorize their creator and may add up to eight additional callers while OPEN. The caller set is immutable after sealing; unauthorized authorization attempts fail before semantic classification or budget mutation.
