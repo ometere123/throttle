@@ -1,0 +1,14 @@
+{
+  "name": "throttle-genlayer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "THROTTLE: semantic rate limiting resistant to paraphrase",
+  "engines": {"node": ">=18"},
+  "devDependencies": {"genlayer": "0.39.1"},
+  "scripts": {
+    "cli:version": "genlayer --version",
+    "toolchain:check": "node scripts/check-toolchain.mjs",
+    "network:studionet": "genlayer network set studionet && genlayer network info",
+    "deploy:studionet": "node scripts/deploy-studionet.mjs"
+  }
+}
