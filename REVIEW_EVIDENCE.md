@@ -2,8 +2,18 @@
 
 Populate only with observed evidence.
 
+## Current authorization-bound status
+
+- Exact-head CI: https://github.com/ometere123/throttle/actions/runs/36356765603
+- Current Direct Mode: 23 passed in 53.38s
+- Active contract: `0x88f748ae9f1A3aCcdE889aA21a86e6214DCFc2e2`
+- Active deployment tx: `0xf2f7d3367e110c87afe61f653d28e0a6e49aca17a79029c43d97ca014abffa20`
+- Active deployed source commit: `10d63983752c5170acbe73b196757af9b566a96e`
+
+The following section is historical evidence for the superseded pre-authorization deployment.
+
 - Deployed source commit: b18d6e06a09fab201838116f1fc4cab6e5c9c28e
-- Direct Mode: 21 passed
+- Direct Mode: 21 passed (historical pre-authorization run)
 - CLI: 0.39.1
 - Network: Studionet
 - Chain ID: 61999
@@ -45,6 +55,6 @@ Populate only with observed evidence.
 - Policy `1` was created by the deployer, sealed with two classes, and automatically authorized its creator.
 - Unauthorized wallet: `0x951e6b75530774ff82321a5ae54e14f778f0c855`; rejection tx `0xba44269e41891046929a7d5fbaad8457a25a59f643aa967521bf173da4e2b05c`; FINALIZED with `AUTH: caller is not authorized for policy`; vendor-payment remaining stayed `100`.
 - Authorized deployer charge tx: `0x545f9c738bc974470c20489fecb0e38aaece819a8609d97c01c1c44777c53d62`; decision `1`; FINALIZED / SUCCESS / ALLOWED; requested `25`; vendor-payment remaining became `75`.
-- The caller allowlist is bounded at 8 entries, creator-controlled only while OPEN, and exposed by `get_policy()`.
+- The caller allowlist is bounded at 8 entries total, including the automatically authorized creator; up to 7 additional callers may be added by the creator while OPEN. It is exposed by `get_policy()`.
 
 Never fabricate addresses, hashes, finality or consensus results.

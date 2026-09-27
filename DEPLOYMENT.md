@@ -43,4 +43,4 @@ The initial deployment above is superseded by the authorization-bound source:
 - `runtime_chain_id()`: `61999`
 - Explorer: https://explorer-studio.genlayer.com/address/0x88f748ae9f1A3aCcdE889aA21a86e6214DCFc2e2
 
-Policies automatically authorize their creator and may add up to eight additional callers while OPEN. The caller set is immutable after sealing; unauthorized authorization attempts fail before semantic classification or budget mutation.
+Policies automatically authorize their creator and support up to eight authorized callers total, including the creator, so up to seven additional callers may be added while the policy is OPEN. The caller set becomes immutable after sealing; unauthorized authorization attempts fail before semantic classification or budget mutation.
