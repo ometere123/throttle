@@ -2,30 +2,37 @@
 
 Populate only with observed evidence.
 
-- Final commit: PENDING
-- Direct Mode: PENDING
+- Deployed source commit: b18d6e06a09fab201838116f1fc4cab6e5c9c28e
+- Direct Mode: 21 passed
 - CLI: 0.39.1
 - Network: Studionet
 - Chain ID: 61999
 - RPC: https://studio.genlayer.com/api
-- Contract address: PENDING
-- Deployment tx/finality: PENDING
-- runtime_chain_id(): PENDING
+- Contract address: `0xCA740cc84E421868360313E230b3f2C23F12Cf58`
+- Deployment tx/finality: `0xd9f16804c713e5df4e2bc390cdc147148c9d311bfdc7eb884c4d7e76c69e8ee4` — FINALIZED / MAJORITY_AGREE / SUCCESS
+- Deployed source: 12,198 bytes; SHA-256 `159919ca97cf8eda90ac99df3408967fa821e29322f4379e0b4bbbe294a5e75d`
+- runtime_chain_id(): `61999`
 
 ## Live budget
-- Policy ID: PENDING
-- Vendor-payment class ID/capacity: PENDING
-- Data-export class ID/capacity: PENDING
-- Seal tx: PENDING
+- Policy ID: `1`; creation tx: `0xbee66d598a0bc4adce0ad0749e81cd2da09b294a7c88db65926746fde55263c4`
+- Vendor-payment class: ID `1`, capacity `100`; tx `0xb8add693d0204aa69743d644baf611729321cd380cd32fccc20047b8903e4c47`
+- Data-export class: ID `2`, capacity `50`; tx `0xed19f25a0ca0de1a36938e73caaea40718d2273b921d16bf6ae847858410bb12`
+- Seal tx: `0xde5ab360ef1229b5e8e8f29424f4e03baece564ec342a2f67b51f41dc3f1d670`; readback SEALED
 
 ## Paraphrase accumulation
-- operation 1 / units / tx / remaining: PENDING
-- operation 2 / units / tx / remaining: PENDING
+- operation 1: "Send 60 units to supplier Acme for invoice 7." / 60 / tx `0xf0b022dda30f1499b064a92c68bf2c57c22d3287635506cd8cee860495514b79` / decision `1` / FINALIZED / SUCCESS / ALLOWED / class `1` / remaining `40`
+- operation 2: "Settle Acme invoice 8 by remitting 30 units to the vendor." / 30 / tx `0x92c686b3bec95de3e231d726d6a85bb9fdf57a4dc397d01057792a5accde93a1` / decision `2` / FINALIZED / SUCCESS / ALLOWED / class `1` / remaining `10`
 
 ## Exhaustion
-- tx / status / unchanged remaining: PENDING
+- tx `0x788fbae399e37d1ac6885c3e614910a9af156377d8de1fa7dac1131c962f7c84` / decision `3` / FINALIZED / SUCCESS / EXHAUSTED / requested `20` / remaining stayed `10`, spent stayed `90`
 
 ## Ambiguity or overlap
-- tx / status / unchanged budgets: PENDING
+- tx `0x5409f5004280d7644274f72cef7bc4acad4b8f6890bc74903dbf534219891965` / decision `4` / FINALIZED / SUCCESS / ALLOWED / class `2` / data-export remaining `40`; vendor-payment remained `10`
+
+## Scope and limitations
+- All five writes finalized with majority agreement and successful contract execution.
+- No clean live AMBIGUOUS/overlap case was recorded; no claim is made for one.
+- The CLI receipt view used here did not expose protocol fee deposit/consumed/refund fields, so no fee amounts are asserted.
+- Explorer base: https://explorer-studio.genlayer.com
 
 Never fabricate addresses, hashes, finality or consensus results.

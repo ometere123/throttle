@@ -12,6 +12,6 @@ The LLM cannot choose requested units, inspect remaining capacity, select a pref
 
 Network: Studionet 61999. Repository CLI: 0.39.1. Frontend: none.
 
-Direct Mode: PENDING
-Deployment: PENDING
-Live lifecycle: PENDING
+Direct Mode: 21 passed; preflight, compile and GenVM lint/validation passed.
+Deployment: FINALIZED / MAJORITY_AGREE / SUCCESS at `0xCA740cc84E421868360313E230b3f2C23F12Cf58`.
+Live lifecycle: Policy 1 sealed with VENDOR_PAYMENT (100) and CUSTOMER_DATA_EXPORT (50). Two paraphrased vendor payments accumulated to 90 spent / 10 remaining; a 20-unit request finalized EXHAUSTED without partial spend; a customer-data export independently consumed 10 from the second class. Evidence is in `REVIEW_EVIDENCE.md`.
